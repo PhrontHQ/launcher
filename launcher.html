@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<script>
+(() => {
+"use strict"
+const get = url => {
+    const request = new XMLHttpRequest
+    request.open("GET", url, false)
+    request.send()
+    return request.responseText
+}
+const options = JSON.parse(get("launcher.json?q=" + Date.now())).options
+document.write(get("index.html?q=" + Date.now()))
+const kitchen = document.createElement("div")
+kitchen.id = "kitchen"
+kitchen.innerHTML = `<style>
+    #kitchen {
+        font-family: sans-serif;
+        position: fixed;
+        top: 12px;
+        right: 0;
+        z-index: 999999;
+        box-shadow: 0 0 16px rgba(0, 0, 0, .25);
+        display: flex;
+        opacity: .35;
+        padding-left: 40px;
+        border-top-left-radius: 40px;
+        border-bottom-left-radius: 40px;
+        background: #aaa;
+        transition: width .4s, opacity .4s;
+        width: 0;
+    }
+    #kitchen.isKitchenExpanded {
+        width: 270px;
+        opacity: 1;
+    }
+    #kitchen select, 
+    #kitchen button {
+        -moz-appearance: none; 
+        -webkit-appearance: none; 
+        appearance: none;
+        margin: 0;
+        min-width: 40px;
+        min-height: 40px;
+        border: none;
+        border-radius: 0;
+        font-size: 12px;
+        padding: 0 4px;
+        outline: none;
+    }
+    #kitchen select {
+        width: 150px;
+        background: white;
+    }
+    #kitchen button {
+        background: #ddd;
+    }
+</style>
+<button id="kitchenPrevious">❮</button>
+<select id="kitchenSelect"></select>
+<button id="kitchenNext">❯</button>`
+document.body.appendChild(kitchen)
+options.forEach(option => {
+    const optionElement = document.createElement("option")
+    optionElement.setAttribute("value", option.search)
+    optionElement.textContent = option.name
+    kitchenSelect.appendChild(optionElement)
+})
+let isKitchenExpanded = localStorage.getItem("isKitchenExpanded") || "true"
+if (isKitchenExpanded === "true") {
+    kitchen.classList.add("isKitchenExpanded")
+}
+let currentOption = [...kitchenSelect.options].find(option => option.getAttribute("value") === document.location.search)
+if (!currentOption) {
+    currentOption = document.createElement("option")
+    currentOption.innerText = document.location.href
+    currentOption.setAttribute("value", document.location.search)
+    kitchenSelect.insertBefore(currentOption, kitchenSelect.firstChild)
+}
+currentOption.setAttribute("selected", true)
+kitchen.addEventListener("click", () => {
+    kitchen.classList.toggle("isKitchenExpanded")
+    localStorage.setItem(
+        "isKitchenExpanded", 
+        isKitchenExpanded = isKitchenExpanded === "true" ? "false" : "true"
+    )
+})
+kitchenPrevious.addEventListener("click", event => {
+    const previousOption = currentOption.previousElementSibling || kitchenSelect.lastElementChild
+    if (previousOption) {
+        console.log(previousOption)
+        document.location.search = previousOption.getAttribute("value")
+    }
+    event.stopPropagation()
+})
+kitchenNext.addEventListener("click", event => {
+    const nextOption = currentOption.nextElementSibling || kitchenSelect.firstElementChild
+    if (nextOption) {
+        document.location.search = nextOption.getAttribute("value")
+    }
+    event.stopPropagation()
+})
+kitchenSelect.addEventListener("click", event => {
+    event.stopPropagation()
+})
+kitchenSelect.addEventListener("input", () => document.location.search = kitchenSelect.value)
+})()
+</script>

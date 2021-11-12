@@ -1,0 +1,8 @@
+{
+    "name": "Launcher",
+    "version": "0.1.0",
+    "description": "Launch an app with different url arguments from a pre-made list",
+    "scripts": {
+        "install": "node install"
+    }
+}
