@@ -21,7 +21,7 @@ launcher.innerHTML = `<style>
         box-shadow: 0 0 16px rgba(0, 0, 0, .25);
         display: flex;
         opacity: .35;
-        padding-left: 40px;
+        padding-left: 50px;
         border-top-left-radius: 40px;
         border-bottom-left-radius: 40px;
         background: #aaa;
@@ -30,7 +30,7 @@ launcher.innerHTML = `<style>
         touch-action: none;
     }
     #launcher.isLauncherExpanded {
-        width: 270px;
+        width: 290px;
         opacity: 1;
     }
     #launcher select, 
@@ -46,9 +46,10 @@ launcher.innerHTML = `<style>
         font-size: 12px;
         padding: 0 4px;
         outline: none;
+        color: black;
     }
     #launcher select {
-        width: 150px;
+        width: 170px;
         background: white;
     }
     #launcher button {
@@ -127,6 +128,7 @@ launcher.addEventListener("pointerdown", event => {
 
     }
 }, true)
+launcher.addEventListener("click", () => {})
 window.addEventListener("resize", draw, true)
 let currentOption = [...launcherSelect.options].find(option => option.getAttribute("value") === document.location.search)
 if (!currentOption) {
@@ -135,11 +137,10 @@ if (!currentOption) {
     currentOption.setAttribute("value", document.location.search)
     launcherSelect.insertBefore(currentOption, launcherSelect.firstChild)
 }
-currentOption.setAttribute("selected", true)
+launcherSelect.value = currentOption.getAttribute("value")
 launcherPrevious.addEventListener("click", event => {
     const previousOption = currentOption.previousElementSibling || launcherSelect.lastElementChild
     if (previousOption) {
-        console.log(previousOption)
         document.location.search = previousOption.getAttribute("value")
     }
     event.stopPropagation()
