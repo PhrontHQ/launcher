@@ -10,10 +10,10 @@ const get = url => {
 }
 const options = JSON.parse(get("launcher.json?q=" + Date.now())).options
 document.write(get("index.html?q=" + Date.now()))
-const kitchen = document.createElement("div")
-kitchen.id = "kitchen"
-kitchen.innerHTML = `<style>
-    #kitchen {
+const launcher = document.createElement("div")
+launcher.id = "launcher"
+launcher.innerHTML = `<style>
+    #launcher {
         font-family: sans-serif;
         position: fixed;
         right: 0;
@@ -29,12 +29,12 @@ kitchen.innerHTML = `<style>
         width: 0;
         touch-action: none;
     }
-    #kitchen.isKitchenExpanded {
+    #launcher.isLauncherExpanded {
         width: 270px;
         opacity: 1;
     }
-    #kitchen select, 
-    #kitchen button {
+    #launcher select, 
+    #launcher button {
         -moz-appearance: none; 
         -webkit-appearance: none; 
         appearance: none;
@@ -47,38 +47,38 @@ kitchen.innerHTML = `<style>
         padding: 0 4px;
         outline: none;
     }
-    #kitchen select {
+    #launcher select {
         width: 150px;
         background: white;
     }
-    #kitchen button {
+    #launcher button {
         background: #ddd;
     }
 </style>
-<button id="kitchenPrevious">❮</button>
-<select id="kitchenSelect"></select>
-<button id="kitchenNext">❯</button>`
-document.body.appendChild(kitchen)
+<button id="launcherPrevious">❮</button>
+<select id="launcherSelect"></select>
+<button id="launcherNext">❯</button>`
+document.body.appendChild(launcher)
 options.forEach(option => {
     const optionElement = document.createElement("option")
     optionElement.setAttribute("value", option.search)
     optionElement.textContent = option.name
-    kitchenSelect.appendChild(optionElement)
+    launcherSelect.appendChild(optionElement)
 })
-let isKitchenExpanded = localStorage.getItem("isKitchenExpanded") || "true"
-if (isKitchenExpanded === "true") {
-    kitchen.classList.add("isKitchenExpanded")
+let isLauncherExpanded = localStorage.getItem("isLauncherExpanded") || "true"
+if (isLauncherExpanded === "true") {
+    launcher.classList.add("isLauncherExpanded")
 }
 
-const localStorageTop = localStorage.getItem("kitchenTop")
-let kitchenTop = localStorageTop === null ? 40 : localStorageTop
+const localStorageTop = localStorage.getItem("launcherTop")
+let launcherTop = localStorageTop === null ? 40 : localStorageTop
 function draw() {
-    if (kitchenTop < 0) {
-        kitchenTop = 0
+    if (launcherTop < 0) {
+        launcherTop = 0
     }
-    kitchenTop = Math.max(0, Math.min(kitchenTop, window.innerHeight - kitchen.offsetHeight))
-    localStorage.setItem("kitchenTop", kitchenTop)
-    kitchen.style.top = kitchenTop + "px"
+    launcherTop = Math.max(0, Math.min(launcherTop, window.innerHeight - launcher.offsetHeight))
+    localStorage.setItem("launcherTop", launcherTop)
+    launcher.style.top = launcherTop + "px"
 }
 draw()
 let startPageY
@@ -90,7 +90,7 @@ function pointermove(event) {
         isMoving = true
     }
     if (isMoving) {
-        kitchenTop = startTop + dY
+        launcherTop = startTop + dY
         draw()
         event.stopPropagation()
     }
@@ -101,10 +101,10 @@ function pointerup(event) {
     document.removeEventListener("pointerup", pointerup, true)
     document.removeEventListener("pointercancel", pointercancel, true)
     if (!isMoving) {
-        kitchen.classList.toggle("isKitchenExpanded")
+        launcher.classList.toggle("isLauncherExpanded")
         localStorage.setItem(
-            "isKitchenExpanded", 
-            isKitchenExpanded = isKitchenExpanded === "true" ? "false" : "true"
+            "isLauncherExpanded", 
+            isLauncherExpanded = isLauncherExpanded === "true" ? "false" : "true"
         )
     }
 }
@@ -114,10 +114,10 @@ function pointercancel(event) {
     document.removeEventListener("pointerup", pointerup, true)
     document.removeEventListener("pointercancel", pointercancel, true)
 }
-kitchen.addEventListener("pointerdown", event => {
-    if (event.target === kitchen) {
+launcher.addEventListener("pointerdown", event => {
+    if (event.target === launcher) {
         startPageY = event.pageY
-        startTop = kitchenTop
+        startTop = launcherTop
         document.addEventListener("pointermove", pointermove, true)
         document.addEventListener("pointerup", pointerup, true)
         document.addEventListener("pointercancel", pointercancel, true)
@@ -128,32 +128,32 @@ kitchen.addEventListener("pointerdown", event => {
     }
 }, true)
 window.addEventListener("resize", draw, true)
-let currentOption = [...kitchenSelect.options].find(option => option.getAttribute("value") === document.location.search)
+let currentOption = [...launcherSelect.options].find(option => option.getAttribute("value") === document.location.search)
 if (!currentOption) {
     currentOption = document.createElement("option")
     currentOption.innerText = document.location.href
     currentOption.setAttribute("value", document.location.search)
-    kitchenSelect.insertBefore(currentOption, kitchenSelect.firstChild)
+    launcherSelect.insertBefore(currentOption, launcherSelect.firstChild)
 }
 currentOption.setAttribute("selected", true)
-kitchenPrevious.addEventListener("click", event => {
-    const previousOption = currentOption.previousElementSibling || kitchenSelect.lastElementChild
+launcherPrevious.addEventListener("click", event => {
+    const previousOption = currentOption.previousElementSibling || launcherSelect.lastElementChild
     if (previousOption) {
         console.log(previousOption)
         document.location.search = previousOption.getAttribute("value")
     }
     event.stopPropagation()
 })
-kitchenNext.addEventListener("click", event => {
-    const nextOption = currentOption.nextElementSibling || kitchenSelect.firstElementChild
+launcherNext.addEventListener("click", event => {
+    const nextOption = currentOption.nextElementSibling || launcherSelect.firstElementChild
     if (nextOption) {
         document.location.search = nextOption.getAttribute("value")
     }
     event.stopPropagation()
 })
-kitchenSelect.addEventListener("click", event => {
+launcherSelect.addEventListener("click", event => {
     event.stopPropagation()
 })
-kitchenSelect.addEventListener("input", () => document.location.search = kitchenSelect.value)
+launcherSelect.addEventListener("input", () => document.location.search = launcherSelect.value)
 })()
 </script>
