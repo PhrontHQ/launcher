@@ -16,7 +16,6 @@ kitchen.innerHTML = `<style>
     #kitchen {
         font-family: sans-serif;
         position: fixed;
-        top: 12px;
         right: 0;
         z-index: 999999;
         box-shadow: 0 0 16px rgba(0, 0, 0, .25);
@@ -28,6 +27,7 @@ kitchen.innerHTML = `<style>
         background: #aaa;
         transition: width .4s, opacity .4s;
         width: 0;
+        touch-action: none;
     }
     #kitchen.isKitchenExpanded {
         width: 270px;
@@ -69,6 +69,65 @@ let isKitchenExpanded = localStorage.getItem("isKitchenExpanded") || "true"
 if (isKitchenExpanded === "true") {
     kitchen.classList.add("isKitchenExpanded")
 }
+
+const localStorageTop = localStorage.getItem("kitchenTop")
+let kitchenTop = localStorageTop === null ? 40 : localStorageTop
+function draw() {
+    if (kitchenTop < 0) {
+        kitchenTop = 0
+    }
+    kitchenTop = Math.max(0, Math.min(kitchenTop, window.innerHeight - kitchen.offsetHeight))
+    localStorage.setItem("kitchenTop", kitchenTop)
+    kitchen.style.top = kitchenTop + "px"
+}
+draw()
+let startPageY
+let startTop
+let isMoving
+function pointermove(event) {
+    const dY = event.pageY - startPageY
+    if (!isMoving && dY * dY > 16) {
+        isMoving = true
+    }
+    if (isMoving) {
+        kitchenTop = startTop + dY
+        draw()
+        event.stopPropagation()
+    }
+}
+function pointerup(event) {
+    event.stopPropagation()
+    document.removeEventListener("pointermove", pointermove, true)
+    document.removeEventListener("pointerup", pointerup, true)
+    document.removeEventListener("pointercancel", pointercancel, true)
+    if (!isMoving) {
+        kitchen.classList.toggle("isKitchenExpanded")
+        localStorage.setItem(
+            "isKitchenExpanded", 
+            isKitchenExpanded = isKitchenExpanded === "true" ? "false" : "true"
+        )
+    }
+}
+function pointercancel(event) {
+    event.stopPropagation()
+    document.removeEventListener("pointermove", pointermove, true)
+    document.removeEventListener("pointerup", pointerup, true)
+    document.removeEventListener("pointercancel", pointercancel, true)
+}
+kitchen.addEventListener("pointerdown", event => {
+    if (event.target === kitchen) {
+        startPageY = event.pageY
+        startTop = kitchenTop
+        document.addEventListener("pointermove", pointermove, true)
+        document.addEventListener("pointerup", pointerup, true)
+        document.addEventListener("pointercancel", pointercancel, true)
+        event.stopPropagation()
+        event.preventDefault()
+        isMoving = false
+
+    }
+}, true)
+window.addEventListener("resize", draw, true)
 let currentOption = [...kitchenSelect.options].find(option => option.getAttribute("value") === document.location.search)
 if (!currentOption) {
     currentOption = document.createElement("option")
@@ -77,13 +136,6 @@ if (!currentOption) {
     kitchenSelect.insertBefore(currentOption, kitchenSelect.firstChild)
 }
 currentOption.setAttribute("selected", true)
-kitchen.addEventListener("click", () => {
-    kitchen.classList.toggle("isKitchenExpanded")
-    localStorage.setItem(
-        "isKitchenExpanded", 
-        isKitchenExpanded = isKitchenExpanded === "true" ? "false" : "true"
-    )
-})
 kitchenPrevious.addEventListener("click", event => {
     const previousOption = currentOption.previousElementSibling || kitchenSelect.lastElementChild
     if (previousOption) {
